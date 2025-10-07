@@ -1,6 +1,7 @@
 <?php
 require_once './vendor/autoload.php';
 require_once 'controllers/categoriasController.php';
+require_once 'controllers/gastosController.php';
 
 
 use MiladRahimi\PhpRouter\Router;
@@ -17,5 +18,6 @@ $router->get('/', function () {
 $router->get('/categorias', [CategoriasController::class, 'obtenerCategorias']);
 
 //Rutas para Gastos
+$router->post('/gastos', [gastosController::class, 'crearGasto']);
 
 $router->dispatch();
