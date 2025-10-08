@@ -18,6 +18,10 @@ $router->get('/', function () {
 $router->get('/categorias', [CategoriasController::class, 'obtenerCategorias']);
 
 //Rutas para Gastos
+$router->get('/gastos', [gastosController::class, 'obtenerGasto']);
+$router->get('/gastos/{categoria}', [gastosController::class, 'obtenerGasto']);
 $router->post('/gastos', [gastosController::class, 'crearGasto']);
+$router->put('/gastos/{id}', [gastosController::class, 'modificarGasto']);
+$router->delete('/gastos/{id}', [gastosController::class, 'eliminarGasto']);
 
 $router->dispatch();

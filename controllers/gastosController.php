@@ -8,6 +8,15 @@ require_once __DIR__ . '/../models/Gastos.php';
 class gastosController
 {
 
+    public function obtenerGasto($categoria = null)
+    {
+        $gasto = new Gastos;
+
+        if (!is_null($categoria)) {
+            return new JsonResponse($gasto->get($categoria));
+        }
+        return new JsonResponse($gasto->get());
+    }
     public function crearGasto(ServerRequest $request)
     {
         $data = $request->getParsedBody();
@@ -22,16 +31,21 @@ class gastosController
         $fecha = $data->fecha;
         $descripcion = $data->descripcion;
 
-        if (!preg_match('^\d+(\.\d{1,2})?$^', $monto)) {
+        if (!preg_match('/^[+-]?\d+(\.\d+)?$/', $monto)) {
             return new JsonResponse(['message' => 'Error en el monto']);
         }
-        if (!preg_match('^\d{4}([\-/.])(0?[1-9]|1[0-2])\1(3[01]|[12][0-9]|0?[1-9])$^', $fecha)) {
-            return new JsonResponse(['message' => 'Error en la fecha']);
+        if (preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/', $fecha)) {
+            list($y, $m, $d) = explode('-', $fecha);
+            $fecha_actual = time();
+            $fecha_usuario = strtotime($fecha);
+            if (!checkdate($m, $d, $y) || $fecha_usuario > $fecha_actual) {
+                return new JsonResponse(['message' => 'Error en la fecha']);
+            }
         }
-        if (!preg_match('^\d+$^', $categoria)) {
+        if (!preg_match('/^[1-9]\d*$/', $categoria)) {
             return new JsonResponse(['message' => 'Error en la categoria']);
         }
-        if (!preg_match('^[A-Za-zÁÉÍÓÚáéíóú0-9 ]+$^', $descripcion)) {
+        if (!preg_match('/^.+$/s', $descripcion)) {
             return new JsonResponse(['message' => 'Error en la categoria']);
         }
 
@@ -44,6 +58,64 @@ class gastosController
             ];
         $gasto = new Gastos;
         return new JsonResponse($gasto->create($data_arr));
+    }
+
+    public function modificarGasto(ServerRequest $request, $id)
+    {
+        $id_al = (int) $id;
+        if (!is_int(intval($id_al)) || intval($id_al) < 1) {
+            return new JsonResponse(['message' => 'error en la consulta']);
+        }
+        $data = $request->getParsedBody();
+
+        if (empty($data)) {
+            $json = $request->getBody()->getContents();
+            $data = json_decode($json) ?? [];
+        }
+
+        $monto = $data->monto;
+        $categoria = $data->categoria;
+        $fecha = $data->fecha;
+        $descripcion = $data->descripcion;
+
+        if (!preg_match('/^[+-]?\d+(\.\d+)?$/', $monto)) {
+            return new JsonResponse(['message' => 'Error en el monto']);
+        }
+        if (preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/', $fecha)) {
+            list($y, $m, $d) = explode('-', $fecha);
+            $fecha_actual = time();
+            $fecha_usuario = strtotime($fecha);
+            if (!checkdate($m, $d, $y) || $fecha_usuario > $fecha_actual) {
+                return new JsonResponse(['message' => 'Error en la fecha']);
+            }
+        }
+        if (!preg_match('/^[1-9]\d*$/', $categoria)) {
+            return new JsonResponse(['message' => 'Error en la categoria']);
+        }
+        if (!preg_match('/^.+$/s', $descripcion)) {
+            return new JsonResponse(['message' => 'Error en la categoria']);
+        }
+
+        $data_arr =
+            [
+                'monto' => $monto,
+                'categoria' => $categoria,
+                'fecha' => $fecha,
+                'descripcion' => $descripcion
+            ];
+        $gasto = new Gastos;
+        return new JsonResponse($gasto->update($data_arr, $id_al));
+    }
+
+    public function eliminarGasto($id)
+    {
+        $id_al = (int) $id;
+        if (!is_int(intval($id_al)) || intval($id_al) < 1) {
+            return new JsonResponse(['message' => 'error en la consulta']);
+        }
+
+        $gasto = new Gastos;
+        return new JsonResponse($gasto->delete($id_al));
     }
 }
 //Pedir los ultimos 10 gastos al modelo
