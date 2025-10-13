@@ -10,13 +10,17 @@ class Gastos
         $this->con = Database::connect();
     }
 
-    public function get($categoria = null)
+    public function get($categoria = null, $fechaInicio = null, $fechaFin = null)
     {
         try {
             if (!is_null($categoria)) {
                 $query = 'SELECT * FROM gastos WHERE categoria = ? ORDER BY fecha DESC LIMIT 10';
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param('i', $categoria);
+            } else if (!is_null($fechaInicio) && !is_null($fechaFin)) {
+                $query = 'SELECT * FROM gastos WHERE fecha BETWEEN ? AND ?  ORDER BY fecha DESC LIMIT 10';
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('ss', $fechaInicio, $fechaFin);
             } else {
                 $query = 'SELECT * FROM gastos ORDER BY fecha DESC LIMIT 10';
                 $stmt = $this->con->prepare($query);

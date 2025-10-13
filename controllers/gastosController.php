@@ -8,13 +8,32 @@ require_once __DIR__ . '/../models/Gastos.php';
 class gastosController
 {
 
-    public function obtenerGasto($categoria = null)
+    public function obtenerGasto($categoria = null, $fechas = null)
     {
         $gasto = new Gastos;
 
         if (!is_null($categoria)) {
             return new JsonResponse($gasto->get($categoria));
         }
+
+        if (!is_null($fechas)) {
+
+            function controlarFechas($fecha)
+            {
+
+                if (preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/', $fecha)) {
+                    list($y, $m, $d) = explode('-', $fecha);
+                    if (!checkdate($m, $d, $y)) {
+                        return new JsonResponse(['message' => 'Error en la fecha']);
+                    }
+                    return $fecha;
+                }
+            }
+
+            [$inicio, $fin] = explode('_', $fechas);
+            return new JsonResponse($gasto->get(null, controlarFechas($inicio), controlarFechas($fin)));
+        }
+
         return new JsonResponse($gasto->get());
     }
     public function crearGasto(ServerRequest $request)

@@ -7,6 +7,7 @@ class Database
     protected static $user;
     protected static $pass;
     protected static $db_name;
+    protected static $port;
 
 
     public static function connect()
@@ -15,8 +16,9 @@ class Database
         self::$user = $_ENV['DB_USER'];
         self::$pass = $_ENV['DB_PASS'];
         self::$db_name = $_ENV['DB_NAME'];
+        self::$port = isset($_ENV['DB_PORT']) ? $_ENV['DB_PORT'] : 3306;
 
-        $con = new mysqli(self::$host, self::$user, self::$pass, self::$db_name) or die('Error en la conexión');
+        $con = new mysqli(self::$host, self::$user, self::$pass, self::$db_name, self::$port) or die('Error en la conexión');
         return $con;
     }
 }
