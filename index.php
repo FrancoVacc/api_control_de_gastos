@@ -7,6 +7,17 @@ require_once 'controllers/gastosController.php';
 use MiladRahimi\PhpRouter\Router;
 use Laminas\Diactoros\Response\JsonResponse;
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+
 $router = Router::create();
 
 // lo que se muestra en la raíz
@@ -20,6 +31,7 @@ $router->get('/categorias', [CategoriasController::class, 'obtenerCategorias']);
 //Rutas para Gastos
 $router->get('/gastos', [gastosController::class, 'obtenerGasto']);
 $router->get('/gastos/{categoria}', [gastosController::class, 'obtenerGasto']);
+$router->get('/gastos/fecha/{fecha}', [gastosController::class, 'obtenerGastoFecha']);
 $router->post('/gastos', [gastosController::class, 'crearGasto']);
 $router->put('/gastos/{id}', [gastosController::class, 'modificarGasto']);
 $router->delete('/gastos/{id}', [gastosController::class, 'eliminarGasto']);

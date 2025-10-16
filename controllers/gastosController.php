@@ -17,6 +17,26 @@ class gastosController
         }
         return new JsonResponse($gasto->get());
     }
+
+    public function ObtenerGastoFecha($fecha = null)
+    {
+        [$fechaInicio, $fechaFin] = explode('_', $fecha);
+
+        function comprobarFecha($fecha)
+        {
+            if (preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/', $fecha)) {
+                list($y, $m, $d) = explode('-', $fecha);
+                if (!checkdate($m, $d, $y)) {
+                    return ['message' => 'Error en la fecha'];
+                }
+                return $fecha;
+            }
+            return ['message' => 'Error en el formato de las fechas'];
+        }
+
+        $gasto = new Gastos;
+        return new JsonResponse($gasto->get(null, comprobarFecha($fechaInicio), comprobarFecha($fechaFin)));
+    }
     public function crearGasto(ServerRequest $request)
     {
         $data = $request->getParsedBody();
